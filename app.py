@@ -10,7 +10,7 @@ st.set_page_config(page_title="AI Test Script Generator", layout="centered")
 # Title and description
 st.title("🧪 AI-Powered Test Script Generator")
 st.markdown("""
-**Gemini FREE API** se generate hota hai:
+**Hugging Face FREE API** se generate hota hai:
 - 🟦 QMate UI test scripts for SAP UI5 / non-UI5  
 - 🟩 API Integration test scripts using Mocha + Got + Chai
 
@@ -28,19 +28,33 @@ if os.path.exists(scraped_path):
     with open(scraped_path, "r", encoding="utf-8") as f:
         qmate_docs = f.read()[:8000]
 
-# --- GEMINI API Key Setup (FREE) ---
-api_key = st.text_input("🔐 Enter your **Gemini API Key** (FREE)", type="password",
-                        help="Get FREE key: [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)")
+# --- HUGGING FACE API KEY SETUP ---
+api_key = st.text_input(
+    "🔐 Enter your Hugging Face API Key (FREE)",
+    type="password",
+    help="Get FREE key: https://huggingface.co/settings/tokens"
+)
+
+HF_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
+
+headers = {
+    "Authorization": f"Bearer {api_key}",
+    "Content-Type": "application/json"
+}
 
 if api_key:
+
     # --- Test Type & Input ---
     test_type = st.selectbox("🧪 Select Test Type", ["QMate UI Test (UI5/Non-UI5)", "Integration Test (API)"])
     input_method = st.radio("✍️ Choose Input Method", ["Manual Input", "Upload CSV (Xray Format)"])
 
     test_steps = ""
     if input_method == "Manual Input":
-        test_steps = st.text_area("📋 Enter Test Steps", height=200,
-                                  placeholder="1. Go to login\n2. Enter credentials\n3. Click login")
+        test_steps = st.text_area(
+            "📋 Enter Test Steps",
+            height=200,
+            placeholder="1. Go to login\n2. Enter credentials\n3. Click login"
+        )
     else:
         uploaded_file = st.file_uploader("📂 Upload CSV (Action, Data, Expected Result)", type=["csv"])
         if uploaded_file:
@@ -54,75 +68,97 @@ if api_key:
     curl_cmd = ""
     expected_response = ""
     if "Integration" in test_type:
-        curl_cmd = st.text_area("🔗 Provide cURL Command",
-                                placeholder="curl -X GET https://api.example.com/users")
-        expected_response = st.text_area("📨 Expected Response (JSON or text)",
-                                         placeholder='{"status": "success", "users": [...]}')
+        curl_cmd = st.text_area(
+            "🔗 Provide cURL Command",
+            placeholder="curl -X GET https://api.example.com/users"
+        )
+        expected_response = st.text_area(
+            "📨 Expected Response (JSON or text)",
+            placeholder='{"status": "success", "users": [...]}'
+        )
 
     # --- Generate Button ---
     if st.button("🚀 Generate Test Script", type="primary"):
+
         if not test_steps.strip():
             st.warning("Please provide test steps.")
         else:
-            with st.spinner("Generating script with Gemini FREE API..."):
+            with st.spinner("Generating script with Hugging Face FREE API..."):
                 try:
+
                     if "QMate" in test_type:
-                        prompt = f"""You are expert QMate test automation engineer for SAP UI5.
+                        prompt = f"""
+You are expert QMate test automation engineer for SAP UI5.
 
 Generate COMPLETE JavaScript test script ONLY for these steps:
 
 {test_steps}
 
 Use:
-- `common.userInteraction.click()`, `common.assertion.textEquals()`
-- `await $(selector).waitForDisplayed()`
-- Mocha `describe`/`it` blocks
-- Realistic selectors like `#loginBtn`, `.userTable`
+- common.userInteraction.click()
+- common.assertion.textEquals()
+- await $(selector).waitForDisplayed()
+- Mocha describe/it blocks
+- Realistic selectors like #loginBtn, .userTable
 - Add timeouts, retries, 1-2 edge cases
 
-CODE ONLY - No explanations."""
-
+CODE ONLY - No explanations.
+"""
                     else:
-                        prompt = f"""Create Mocha + Got + Chai API test:
+                        prompt = f"""
+Create Mocha + Got + Chai API test.
 
-Steps: {test_steps}
-cURL: {curl_cmd}
-Expected: {expected_response}
+Steps:
+{test_steps}
+
+cURL:
+{curl_cmd}
+
+Expected:
+{expected_response}
 
 Use:
-- `const got = require('got')`
-- `chai.expect(response.statusCode).to.equal(200)`
+- const got = require('got')
+- chai.expect(response.statusCode).to.equal(200)
 - Happy path + 2 edge cases
 - Proper async/await
 
-CODE ONLY."""
+CODE ONLY.
+"""
 
-                    # 🔥 GEMINI FREE API CALL 
-                    gemini_response = requests.post(
-                        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=" + api_key,
-                        headers={"Content-Type": "application/json"},
+                    response = requests.post(
+                        HF_API_URL,
+                        headers=headers,
                         json={
-                            "contents": [{"parts": [{"text": prompt}]}],
-                            "generationConfig": {
+                            "inputs": prompt,
+                            "parameters": {
                                 "temperature": 0.1,
-                                "maxOutputTokens": 2048
+                                "max_new_tokens": 2048,
+                                "return_full_text": False
                             }
                         },
-                        timeout=30
+                        timeout=60
                     )
-                    
-                    if gemini_response.status_code == 200:
-                        result = gemini_response.json()
-                        script = result["candidates"][0]["content"]["parts"][0]["text"].strip()
+
+                    if response.status_code == 200:
+                        result = response.json()
+
+                        if isinstance(result, list):
+                            script = result[0]["generated_text"].strip()
+                        else:
+                            script = result.get("generated_text", "").strip()
+
                         st.code(script, language="javascript")
                         st.balloons()
-                        st.success("✅ Perfect test script generated with Gemini FREE API!")
+                        st.success("✅ Perfect test script generated with Hugging Face FREE API!")
+
                     else:
-                        st.error(f"Gemini API Error: {gemini_response.text}")
-                        
+                        st.error(f"Hugging Face API Error: {response.text}")
+
                 except Exception as e:
                     st.error(f"Error: {str(e)}")
-                    st.info("💡 Get FREE Gemini key: https://aistudio.google.com/app/apikey")
+                    st.info("💡 Get FREE key: https://huggingface.co/settings/tokens")
+
 else:
-    st.info("🔐 **FREE Gemini API Key** → [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)")
-    st.markdown("**No credit card needed** - 100% Free + 1000 requests/day!")
+    st.info("🔐 FREE Hugging Face API Key → https://huggingface.co/settings/tokens")
+    st.markdown("No credit card needed - Free tier available!")
