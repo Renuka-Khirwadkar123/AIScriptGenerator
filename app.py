@@ -7,7 +7,7 @@ st.set_page_config(page_title="AI Test Script Generator", layout="centered")
 
 st.title("🧪 AI-Powered Test Script Generator")
 st.markdown("""
-**Hugging Face FREE Inference API** se generate hota hai:
+**Hugging Face FREE Router API** se generate hota hai:
 - 🟦 QMate UI test scripts (SAP UI5/non-UI5)
 - 🟩 API Integration tests (Mocha + Got + Chai)
 """)
@@ -26,8 +26,8 @@ api_key = st.text_input(
     help="https://huggingface.co/settings/tokens → New token → Read access"
 )
 
-# ✅ Stable model endpoint (NOT router)
-HF_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
+# ✅ NEW Router Endpoint
+HF_API_URL = "https://router.huggingface.co/v1/chat/completions"
 
 headers = {
     "Authorization": f"Bearer {api_key}",
@@ -84,7 +84,7 @@ if api_key:
         if not test_steps.strip():
             st.warning("Please provide test steps.")
         else:
-            with st.spinner("Generating with Hugging Face FREE API..."):
+            with st.spinner("Generating with Hugging Face FREE Router API..."):
                 try:
 
                     if "QMate" in test_type:
@@ -130,29 +130,29 @@ CODE ONLY.
                         HF_API_URL,
                         headers=headers,
                         json={
-                            "inputs": prompt,
-                            "parameters": {
-                                "temperature": 0.1,
-                                "max_new_tokens": 2048,
-                                "return_full_text": False
-                            }
+                            "model": "mistralai/Mistral-7B-Instruct-v0.2",
+                            "messages": [
+                                {"role": "system", "content": "You are an expert test automation engineer."},
+                                {"role": "user", "content": prompt}
+                            ],
+                            "temperature": 0.1,
+                            "max_tokens": 2048
                         },
                         timeout=90
                     )
 
-                    # ✅ Handle 503 (model loading)
+                    # Handle model loading
                     if response.status_code == 503:
                         st.warning("⏳ Model is loading... Please wait 15–20 seconds and try again.")
                         st.stop()
 
+                    if response.status_code == 429:
+                        st.warning("⚠ Rate limit exceeded. Please wait a minute and retry.")
+                        st.stop()
+
                     if response.status_code == 200:
                         result = response.json()
-
-                        # Safe extraction
-                        if isinstance(result, list):
-                            script = result[0].get("generated_text", "").strip()
-                        else:
-                            script = result.get("generated_text", "").strip()
+                        script = result["choices"][0]["message"]["content"].strip()
 
                         if script:
                             st.code(script, language="javascript")
@@ -160,7 +160,6 @@ CODE ONLY.
                             st.success("✅ Perfect test script generated!")
                         else:
                             st.error("Empty response from model.")
-
                     else:
                         st.error(f"HF Error: {response.text}")
 
