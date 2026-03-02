@@ -66,7 +66,7 @@ if api_key:
             with st.spinner("Generating script with Gemini..."):
                 try:
                     # 🔥 FIXED MODEL - 100% WORKING March 2026
-                    model = genai.GenerativeModel("gemini-pro")
+                    model = genai.GenerativeModel("gemini-2.0-flash")
                     
                     if "QMate" in test_type:
                         prompt = f"""
