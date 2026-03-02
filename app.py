@@ -130,7 +130,7 @@ CODE ONLY.
                         HF_API_URL,
                         headers=headers,
                         json={
-                            "model": "openai/gpt-oss-20b",
+                            "model": "meta-llama/Meta-Llama-3-8B-Instruct",
                             "messages": [
                                 {"role": "system", "content": "You are an expert test automation engineer."},
                                 {"role": "user", "content": prompt}
