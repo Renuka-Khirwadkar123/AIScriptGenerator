@@ -65,7 +65,7 @@ if api_key:
         else:
             with st.spinner("Generating script with Gemini..."):
                 try:
-                    model = genai.GenerativeModel("gemini-1.5-flash")
+                    model = genai.GenerativeModel("gemini-1.5-flash-001")
 
                     if "QMate" in test_type:
                         prompt = f"""
