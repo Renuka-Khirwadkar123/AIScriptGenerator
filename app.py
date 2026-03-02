@@ -130,7 +130,7 @@ CODE ONLY.
                         HF_API_URL,
                         headers=headers,
                         json={
-                            "model": "mistralai/Mistral-7B-Instruct-v0.2",
+                            "model": "openai/gpt-oss-20b",
                             "messages": [
                                 {"role": "system", "content": "You are an expert test automation engineer."},
                                 {"role": "user", "content": prompt}
