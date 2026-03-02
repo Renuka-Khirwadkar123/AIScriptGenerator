@@ -1,54 +1,123 @@
-**AIScriptGenerator**
- 
-**Project Overview**
-AI-Powered Test Script Generator - Generates QUnit UI5 tests, Mocha+Chai API tests, and reusable test functions using Gemini AI. Live at https://aiscriptgenerator.streamlit.app/.
+AIScriptGenerator
+Project Overview
+
+AI-Powered Test Script Generator – Generates QUnit UI5 tests, Mocha + Chai API tests, and reusable automation functions using Hugging Face Router API powered by Groq (Meta Llama 3 8B Instruct).
+
+🌐 Live App: https://aiscriptgenerator.streamlit.app/
+
+🧠 AI Model & Provider
+
+The application now uses:
+
+Hugging Face Router API
+
+Groq (Inference Provider)
+
+Model: meta-llama/Meta-Llama-3-8B-Instruct
+
+Why This Upgrade?
+
+⚡ Ultra-fast inference (Groq acceleration)
+
+🧠 Strong structured code generation
+
+🆓 Free-tier friendly
+
+🔄 Provider abstraction (easy future model switching)
+
+🚀 More reliable than previous Gemini free-tier setup
 
 ✨ Key Features
-🟦 QUnit UI5 tests (non-UI5 SAP tests)
 
-🟩 Mocha+Chai API integration tests
+🟦 QUnit UI5 tests (SAP UI5 / non-UI5)
 
-🟨 Reusable edge cases (Mocha+got)
+🟩 Mocha + Chai API integration tests
 
-⏰ Timeout/retry handling
+🟨 Reusable test functions with edge cases (Mocha + got)
 
-📋 Follows Mocha official syntax
+⏰ Timeout & retry handling included
 
-**Live Demo**
-✅ Try it now: [
+📋 Follows official Mocha syntax standards
 
-🚀 Already Live - No Setup Required
-Production deployed on Streamlit Cloud with built-in Gemini API key input box on UI.
+🔄 CSV (Xray format) upload support
 
-Usage (3 clicks)
-Visit live app
+⚡ Dynamic prompt engineering for structured output
 
-Enter Gemini API key (input box provided)
+🏗 Architecture Overview
+Streamlit Frontend
+        ↓
+Prompt Engineering Layer
+        ↓
+Hugging Face Router API
+        ↓
+Groq Inference Provider
+        ↓
+Meta-Llama-3-8B-Instruct
+        ↓
+Generated JavaScript Test Script
+🚀 Live Demo
 
-**How to Generate Gemini API Key (For AIScriptGenerator)
-**
+✅ Try it now:
+https://aiscriptgenerator.streamlit.app/
+
+🚀 Already Live – No Setup Required
+
+Production deployed on Streamlit Cloud with Hugging Face API key input box in UI.
+
+🔐 How to Generate Hugging Face API Key (For AIScriptGenerator)
 Step-by-Step Guide
-Visit Google AI Studio
-Go to: 
-https://aistudio.google.com/app/apikey
-​
+1️⃣ Create Hugging Face Account
 
-Sign In
-Use your Google account (Gmail)
+Go to:
+https://huggingface.co/
 
-Create API Key
+Sign up / Log in.
 
-Click "Get API key" or "Create API key"
+2️⃣ Generate API Token
 
-Choose "Create API key in new project" (easiest)
+Go to:
+https://huggingface.co/settings/tokens
 
-Copy Your Key
-Key format: AIzaSy... (starts with AIzaSy)
-✅ Copy immediately - shown only once
+Click New token
 
-Paste in App
-Open https://aiscriptgenerator.streamlit.app/
-Paste key in the input box → Generate tests!
+Select:
 
-Paste your test scenario → Generate → Copy
+Role → Read
 
+Click Generate
+
+Token format:
+
+hf_xxxxxxxxxxxxxxxxx
+
+Copy immediately.
+
+3️⃣ Enable Groq Provider
+
+Go to:
+
+https://huggingface.co/settings/inference-providers
+
+Enable:
+
+✅ Groq
+
+(This is required for Meta Llama 3 model support.)
+
+4️⃣ Use in App
+
+Open: https://aiscriptgenerator.streamlit.app/
+
+Paste your Hugging Face API key
+
+Select test type
+
+Paste test scenario
+
+Click Generate Test Script
+
+🧪 Usage (3 Clicks)
+
+1️⃣ Visit live app
+2️⃣ Enter Hugging Face API key
+3️⃣ Paste test steps → Generate → Copy script
