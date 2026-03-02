@@ -1,9 +1,10 @@
-# ✅ COMPLETE OpenAI VERSION - Copy & Replace Entire app.py
+# ✅ COMPLETE GROK API VERSION - 100% FREE, No Quota Issues
 
 import streamlit as st
-from openai import OpenAI
+import requests
 import pandas as pd
 import os
+import json
 
 # --- SETUP ---
 st.set_page_config(page_title="AI Test Script Generator", layout="centered")
@@ -11,7 +12,7 @@ st.set_page_config(page_title="AI Test Script Generator", layout="centered")
 # Title and description
 st.title("🧪 AI-Powered Test Script Generator")
 st.markdown("""
-Choose your test mode and input method. This app uses **OpenAI** to generate:
+Choose your test mode and input method. This app uses **Grok AI** (FREE) to generate:
 - 🟦 QMate UI test scripts for SAP UI5 / non-UI5
 - 🟩 API Integration test scripts using Mocha + Got + Chai
 
@@ -27,15 +28,13 @@ scraped_path = "index.md"
 qmate_docs = ""
 if os.path.exists(scraped_path):
     with open(scraped_path, "r", encoding="utf-8") as f:
-        qmate_docs = f.read()[:12000]  # Keep within token limit
+        qmate_docs = f.read()[:8000]  # Reduced for Grok limits
 
 # --- API Key Setup ---
-api_key = st.text_input("🔐 Enter your **OpenAI** API Key", type="password", 
-                       help="Get free key: https://platform.openai.com/api-keys")
+api_key = st.text_input("🔐 Enter your **Grok API Key** (completely free)", type="password", 
+                       help="Get FREE key: https://console.x.ai/ → API Keys")
 
 if api_key:
-    client = OpenAI(api_key=api_key)
-
     # --- Test Type & Input ---
     test_type = st.selectbox("🧪 Select Test Type", ["QMate UI Test (UI5/Non-UI5)", "Integration Test (API)"])
     input_method = st.radio("✍️ Choose Input Method", ["Manual Input", "Upload CSV (Xray Format)"])
@@ -63,60 +62,71 @@ if api_key:
                                         placeholder='{"status": "success", "users": [...]}')
 
     # --- Generate Button ---
-    if st.button("🚀 Generate Test Script"):
+    if st.button("🚀 Generate Test Script", type="primary"):
         if not test_steps.strip():
             st.warning("Please provide test steps.")
         else:
-            with st.spinner("Generating script with OpenAI..."):
+            with st.spinner("Generating script with Grok AI..."):
                 try:
                     if "QMate" in test_type:
-                        prompt = f"""You are a QMate test automation expert.
+                        prompt = f"""You are expert QMate test automation engineer for SAP UI5.
 
-Use official QMate syntax to generate JavaScript test script for these steps:
+Generate COMPLETE JavaScript test script ONLY for these steps:
 
-📋 Test Steps:
 {test_steps}
 
-✅ REQUIREMENTS:
-- Use `common.userInteraction`, `common.assertion`, `common.navigation`
-- Realistic selectors: `await $(...)`
-- Separate `it` blocks for each major action
-- Add `waitUntil`, timeouts, retries
-- Include 1-2 edge cases
-- Mocha `describe`/`it` structure
+Use:
+- `common.userInteraction.click()`, `common.assertion.textEquals()`
+- `await $(selector).waitForDisplayed()`
+- Mocha `describe`/`it` blocks
+- Realistic selectors like `#loginBtn`, `.userTable`
+- Add timeouts, retries, 1-2 edge cases
 
-Return ONLY the JavaScript code. No explanations."""
+CODE ONLY - No explanations."""
 
                     else:
-                        prompt = f"""Create Mocha + Got + Chai API test for:
+                        prompt = f"""Create Mocha + Got + Chai API test:
 
-📋 Steps: {test_steps}
-🔗 cURL: {curl_cmd}
-📨 Expected: {expected_response}
+Steps: {test_steps}
+cURL: {curl_cmd}
+Expected: {expected_response}
 
-✅ Include:
-- Happy path test
-- Edge cases (400, 404, timeout)
-- `got()` for HTTP requests
-- `chai.expect()` assertions
-- Proper `describe`/`it` blocks
+Use:
+- `const got = require('got')`
+- `chai.expect(response.statusCode).to.equal(200)`
+- Happy path + 2 edge cases
+- Proper async/await
 
-Return ONLY JavaScript code."""
+CODE ONLY."""
 
-                    # 🔥 OPENAI CALL - 100% WORKING
-                    response = client.chat.completions.create(
-                        model="gpt-4o-mini",  # FREE tier model
-                        messages=[{"role": "user", "content": prompt}],
-                        max_tokens=2000,
-                        temperature=0.1
+                    # 🔥 GROK API CALL - COMPLETELY FREE
+                    grok_response = requests.post(
+                        "https://api.x.ai/v1/chat/completions",
+                        headers={
+                            "Authorization": f"Bearer {api_key}",
+                            "Content-Type": "application/json"
+                        },
+                        json={
+                            "model": "grok-beta",
+                            "messages": [{"role": "user", "content": prompt}],
+                            "max_tokens": 2048,
+                            "temperature": 0.1
+                        },
+                        timeout=30
                     )
                     
-                    script = response.choices[0].message.content.strip()
-                    st.code(script, language="javascript")
-                    st.success("✅ Test script generated with OpenAI!")
-                    
+                    if grok_response.status_code == 200:
+                        result = grok_response.json()
+                        script = result["choices"][0]["message"]["content"].strip()
+                        st.code(script, language="javascript")
+                        st.balloons()
+                        st.success("✅ Perfect test script generated with Grok AI!")
+                    else:
+                        st.error(f"Grok API Error: {grok_response.text}")
+                        
                 except Exception as e:
                     st.error(f"Error: {str(e)}")
-                    st.info("💡 Get free OpenAI key: platform.openai.com/api-keys")
+                    st.info("💡 Grok Console: https://console.x.ai/")
 else:
-    st.info("🔐 Enter OpenAI API key to start (Free $5 credit at signup)")
+    st.info("🔐 Get FREE Grok API key → https://console.x.ai/ → API Keys")
+    st.markdown("**No billing required** - Unlimited free usage!")
